@@ -257,61 +257,68 @@
     </div>
   </div>
 
-  <script>
-    const LEVEL = 50;
+<script>
+  const LEVEL = 50;
 
-    function baseDamage(power, attack, defense) {
-      return Math.floor(
-        Math.floor(
-          Math.floor(((2 * LEVEL) / 5 + 2) * power * attack / defense) / 50
-        ) + 2
-      );
+  function floor(value) {
+    return Math.floor(value);
+  }
+
+  function calcBaseDamage(power, attack, defense) {
+    // 基礎ダメージ
+    const step1 = floor((2 * LEVEL) / 5 + 2);
+    const step2 = floor(step1 * power * attack / defense);
+    const step3 = floor(step2 / 50);
+    const baseDamage = step3 + 2;
+    return baseDamage;
+  }
+
+  function calcFinalDamage(baseDamage, stab, typeEffect, otherModifier, randomFactor) {
+    let damage = baseDamage;
+
+    // 補正は段階ごとに切り捨て
+    damage = floor(damage * stab);
+    damage = floor(damage * typeEffect);
+    damage = floor(damage * otherModifier);
+    damage = floor(damage * randomFactor);
+
+    return damage;
+  }
+
+  function calculateDamage() {
+    const power = Number(document.getElementById("power").value);
+    const attack = Number(document.getElementById("attack").value);
+    const defense = Number(document.getElementById("defense").value);
+    const hp = Number(document.getElementById("hp").value);
+    const stab = Number(document.getElementById("stab").value);
+    const typeEffect = Number(document.getElementById("typeEffect").value);
+    const otherModifier = Number(document.getElementById("otherModifier").value);
+
+    const baseDamage = calcBaseDamage(power, attack, defense);
+
+    const minDamage = calcFinalDamage(baseDamage, stab, typeEffect, otherModifier, 0.85);
+    const maxDamage = calcFinalDamage(baseDamage, stab, typeEffect, otherModifier, 1.00);
+
+    const minPercent = ((minDamage / hp) * 100).toFixed(1);
+    const maxPercent = ((maxDamage / hp) * 100).toFixed(1);
+
+    let koText = "-";
+    if (typeEffect === 0 || maxDamage === 0) {
+      koText = "ダメージなし";
+    } else {
+      const bestCase = Math.ceil(hp / maxDamage);
+      const worstCase = Math.ceil(hp / Math.max(minDamage, 1));
+      koText = bestCase === worstCase ? `${bestCase}発` : `${bestCase}〜${worstCase}発`;
     }
 
-    function calculateOne(power, attack, defense, modifier, randomFactor) {
-      const base = baseDamage(power, attack, defense);
-      return Math.floor(base * modifier * randomFactor);
-    }
-
-    function calculateDamage() {
-      const power = Number(document.getElementById('power').value);
-      const attack = Number(document.getElementById('attack').value);
-      const defense = Number(document.getElementById('defense').value);
-      const hp = Number(document.getElementById('hp').value);
-      const stab = Number(document.getElementById('stab').value);
-      const typeEffect = Number(document.getElementById('typeEffect').value);
-      const otherModifier = Number(document.getElementById('otherModifier').value);
-
-      if (!power || !attack || !defense || !hp) {
-        document.getElementById('damageText').textContent = '入力不足';
-        document.getElementById('percentText').textContent = '-';
-        document.getElementById('koText').textContent = '-';
-        document.getElementById('damageBar').style.width = '0%';
-        return;
-      }
-
-      const modifier = stab * typeEffect * otherModifier;
-      const minDamage = calculateOne(power, attack, defense, modifier, 0.85);
-      const maxDamage = calculateOne(power, attack, defense, modifier, 1.0);
-      const minPercent = ((minDamage / hp) * 100).toFixed(1);
-      const maxPercent = ((maxDamage / hp) * 100).toFixed(1);
-
-      let koText = '-';
-      if (typeEffect === 0 || maxDamage === 0) {
-        koText = 'ダメージなし';
-      } else {
-        const bestCase = Math.ceil(hp / maxDamage);
-        const worstCase = Math.ceil(hp / Math.max(minDamage, 1));
-        koText = bestCase === worstCase ? `${bestCase}発` : `${bestCase}〜${worstCase}発`;
-      }
-
-      document.getElementById('damageText').textContent = `${minDamage} 〜 ${maxDamage}`;
-      document.getElementById('percentText').textContent = `${minPercent}% 〜 ${maxPercent}%`;
-      document.getElementById('koText').textContent = koText;
-      document.getElementById('damageBar').style.width = `${Math.min((maxDamage / hp) * 100, 100)}%`;
-    }
-
-    calculateDamage();
-  </script>
+    document.getElementById("result").innerHTML = `
+      <strong>レベル:</strong> 50固定<br>
+      <strong>基礎ダメージ:</strong> ${baseDamage}<br>
+      <strong>最終ダメージ:</strong> ${minDamage} 〜 ${maxDamage}<br>
+      <strong>割合:</strong> ${minPercent}% 〜 ${maxPercent}%<br>
+      <strong>倒すまでの目安:</strong> ${koText}
+    `;
+  }
+</script>
 </body>
 </html>
