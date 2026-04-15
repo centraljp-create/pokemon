@@ -310,14 +310,17 @@
       const worstCase = Math.ceil(hp / Math.max(minDamage, 1));
       koText = bestCase === worstCase ? `${bestCase}発` : `${bestCase}〜${worstCase}発`;
     }
+document.getElementById("damageText").textContent =
+  `基礎 ${baseDamage} / 最終 ${minDamage} 〜 ${maxDamage}`;
 
-    document.getElementById("result").innerHTML = `
-      <strong>レベル:</strong> 50固定<br>
-      <strong>基礎ダメージ:</strong> ${baseDamage}<br>
-      <strong>最終ダメージ:</strong> ${minDamage} 〜 ${maxDamage}<br>
-      <strong>割合:</strong> ${minPercent}% 〜 ${maxPercent}%<br>
-      <strong>倒すまでの目安:</strong> ${koText}
-    `;
+document.getElementById("percentText").textContent =
+  `${minPercent}% 〜 ${maxPercent}%`;
+
+document.getElementById("koText").textContent = koText;
+
+const barPercent = Math.min((maxDamage / hp) * 100, 100);
+document.getElementById("damageBar").style.width = `${barPercent}%`;
+    
   }
   </script>
 </body>
