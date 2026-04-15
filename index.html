@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ポケモンチャンピオンズ ダメージ計算機</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --sub: #6b7280;
+      --line: #e5e7eb;
+      --accent: #ef4444;
+      --accent2: #f97316;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #fff7ed 0%, var(--bg) 28%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 16px 14px 40px;
+    }
+
+    .header {
+      padding: 10px 4px 14px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--sub);
+      font-size: 13px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      margin-bottom: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--sub);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px 13px;
+      font-size: 16px;
+      color: var(--text);
+      appearance: none;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid rgba(249, 115, 22, 0.18);
+      border-color: var(--accent2);
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(239, 68, 68, 0.22);
+    }
+
+    .result-title {
+      margin: 0 0 12px;
+      font-size: 17px;
+    }
+
+    .stats {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .row:last-child { border-bottom: none; }
+
+    .k {
+      color: var(--sub);
+      font-size: 14px;
+    }
+
+    .v {
+      font-weight: 700;
+      text-align: right;
+      font-size: 15px;
+    }
+
+    .bar-wrap {
+      margin-top: 12px;
+    }
+
+    .bar-label {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 8px;
+    }
+
+    .bar {
+      width: 100%;
+      height: 14px;
+      background: #f3f4f6;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+      transition: width .25s ease;
+    }
+
+    .mini {
+      margin-top: 10px;
+      color: var(--sub);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 420px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .full {
+        grid-column: auto;
+      }
+      h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>ポケモンチャンピオンズ<br>ダメージ計算機</h1>
+      <p class="sub">レベル50固定 / 急所なし / スマホ向けプレビュー版</p>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <label>
+          技威力
+          <input type="number" id="power" value="100" min="1" />
+        </label>
+
+        <label>
+          相手HP
+          <input type="number" id="hp" value="200" min="1" />
+        </label>
+
+        <label>
+          攻撃値 / 特攻
+          <input type="number" id="attack" value="150" min="1" />
+        </label>
+
+        <label>
+          防御値 / 特防
+          <input type="number" id="defense" value="100" min="1" />
+        </label>
+
+        <label>
+          タイプ一致
+          <select id="stab">
+            <option value="1">なし</option>
+            <option value="1.5" selected>あり (1.5)</option>
+            <option value="2">強化一致 (2.0)</option>
+          </select>
+        </label>
+
+        <label>
+          タイプ相性
+          <select id="typeEffect">
+            <option value="0">0倍</option>
+            <option value="0.25">0.25倍</option>
+            <option value="0.5">0.5倍</option>
+            <option value="1" selected>1倍</option>
+            <option value="2">2倍</option>
+            <option value="4">4倍</option>
+          </select>
+        </label>
+
+        <label class="full">
+          その他補正
+          <input type="number" id="otherModifier" value="1" step="0.01" min="0" />
+        </label>
+      </div>
+    </div>
+
+    <button class="btn" onclick="calculateDamage()">計算する</button>
+
+    <div class="card" style="margin-top:14px;">
+      <h2 class="result-title">結果</h2>
+      <div class="stats">
+        <div class="row"><div class="k">レベル</div><div class="v">50固定</div></div>
+        <div class="row"><div class="k">ダメージ</div><div class="v" id="damageText">-</div></div>
+        <div class="row"><div class="k">割合</div><div class="v" id="percentText">-</div></div>
+        <div class="row"><div class="k">倒すまでの目安</div><div class="v" id="koText">-</div></div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar-label">最大ダメージ時の削り量</div>
+        <div class="bar"><div class="bar-fill" id="damageBar"></div></div>
+      </div>
+
+      <div class="mini">※ 現時点では簡易版。正式仕様が分かったら計算順を差し替えやすい構造にしてあります。</div>
+    </div>
+  </div>
+
+  <script>
+    const LEVEL = 50;
+
+    function baseDamage(power, attack, defense) {
+      return Math.floor(
+        Math.floor(
+          Math.floor(((2 * LEVEL) / 5 + 2) * power * attack / defense) / 50
+        ) + 2
+      );
+    }
+
+    function calculateOne(power, attack, defense, modifier, randomFactor) {
+      const base = baseDamage(power, attack, defense);
+      return Math.floor(base * modifier * randomFactor);
+    }
+
+    function calculateDamage() {
+      const power = Number(document.getElementById('power').value);
+      const attack = Number(document.getElementById('attack').value);
+      const defense = Number(document.getElementById('defense').value);
+      const hp = Number(document.getElementById('hp').value);
+      const stab = Number(document.getElementById('stab').value);
+      const typeEffect = Number(document.getElementById('typeEffect').value);
+      const otherModifier = Number(document.getElementById('otherModifier').value);
+
+      if (!power || !attack || !defense || !hp) {
+        document.getElementById('damageText').textContent = '入力不足';
+        document.getElementById('percentText').textContent = '-';
+        document.getElementById('koText').textContent = '-';
+        document.getElementById('damageBar').style.width = '0%';
+        return;
+      }
+
+      const modifier = stab * typeEffect * otherModifier;
+      const minDamage = calculateOne(power, attack, defense, modifier, 0.85);
+      const maxDamage = calculateOne(power, attack, defense, modifier, 1.0);
+      const minPercent = ((minDamage / hp) * 100).toFixed(1);
+      const maxPercent = ((maxDamage / hp) * 100).toFixed(1);
+
+      let koText = '-';
+      if (typeEffect === 0 || maxDamage === 0) {
+        koText = 'ダメージなし';
+      } else {
+        const bestCase = Math.ceil(hp / maxDamage);
+        const worstCase = Math.ceil(hp / Math.max(minDamage, 1));
+        koText = bestCase === worstCase ? `${bestCase}発` : `${bestCase}〜${worstCase}発`;
+      }
+
+      document.getElementById('damageText').textContent = `${minDamage} 〜 ${maxDamage}`;
+      document.getElementById('percentText').textContent = `${minPercent}% 〜 ${maxPercent}%`;
+      document.getElementById('koText').textContent = koText;
+      document.getElementById('damageBar').style.width = `${Math.min((maxDamage / hp) * 100, 100)}%`;
+    }
+
+    calculateDamage();
+  </script>
+</body>
+</html>
