@@ -265,13 +265,13 @@
   }
 
   function calcBaseDamage(power, attack, defense) {
-    // 基礎ダメージ
-    const step1 = floor((2 * LEVEL) / 5 + 2);
-    const step2 = floor(step1 * power * attack / defense);
-    const step3 = floor(step2 / 50);
-    const baseDamage = step3 + 2;
-    return baseDamage;
-  }
+  let damage = Math.floor((2 * LEVEL) / 5 + 2);
+  damage = Math.floor(damage * power);
+  damage = Math.floor(damage * attack);
+  damage = Math.floor(damage / defense);
+  damage = Math.floor(damage / 50);
+  return damage + 2;
+}
 
   function calcFinalDamage(baseDamage, stab, typeEffect, otherModifier, randomFactor) {
     let damage = baseDamage;
